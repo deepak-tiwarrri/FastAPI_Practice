@@ -1,60 +1,66 @@
-from fastapi import FastAPI,Request;
-from mockdata import products;
-from dtos import ProductDTO;
+from fastapi import FastAPI
+from src.utils.db import Base, engine
+from src.tasks.router import task_router
 
 
-app = FastAPI();
+app = FastAPI(title="My Task Management Application")
 
-@app.get("/")
-def home():
-    return "Welcome to fastapi";
-
-
-@app.get("/products")
-def get_products():
-    return products;
-
-@app.get("/products/{product_id}")
-def get_one_product(product_id:int):
-    for product in products:
-        if product.get('id') == product_id:
-            return product
-    return {"error":"Product not found"}
-
-@app.get("/greet")
-def greet(name:str,age:int):
-    return {"message":f"Welcome,{name}, your age is {age}"}
-
-@app.get("/greet_advanced")
-def greet_advanced(request:Request):
-    params = dict(request.query_params)
-    name = params.get('name')
-    age = params.get('age')
-    return {"message":f"Hello {name},your age is {age}","all_params":params}
-
-# now we have to post the new data of product 
-@app.post('/create_product')
-def create_product(product:ProductDTO):
-    new_product = product.model_dump();
-    products.append(new_product)
-    return {"status":"Product Created Successfully","data":products}
-
-@app.put("/update_product")
-def update_product(product_id:int,product_data:ProductDTO):
-    for index, product in enumerate(products):
-        if product_id == product.get('id'):
-            products[index]= product_data.model_dump();
-            return {"status":"Product Updated Successfully","data":products}
-    
-    return {"error":"Not able to find the Product!!"}
+# Create all tables in the database
+Base.metadata.create_all(bind=engine)
 
 
-@app.delete("/delete-product/{product_id}")
-def delete_product(product_id:int):
-    for index, product in enumerate(products):
-        if product_id == product.get('id'):
-            deleted_product = products.pop(index);
-            return {
-                "status":"Deleted Successfully","deleted_product":deleted_product
-            }
-    return {"error":f"Product not found with ID {product_id} "}
+app.include_router(task_router)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # ──────────────────────────────────────────
+# # CREATE a user
+# # ──────────────────────────────────────────
+# @app.post("/users/", response_model=schemas.UserResponse)
+# def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+#     db_user = models.User(name=user.name, email=user.email)
+#     db.add(db_user)      # add to session
+#     db.commit()          # save to database
+#     db.refresh(db_user)  # get updated data (like auto id)
+#     return db_user
+
+# # ──────────────────────────────────────────
+# # GET all users
+# # ──────────────────────────────────────────
+# @app.get("/users/", response_model=list[schemas.UserResponse])
+# def get_all_users(db: Session = Depends(get_db)):
+#     return db.query(models.User).all()
+
+# # ──────────────────────────────────────────
+# # GET single user by ID
+# # ──────────────────────────────────────────
+# @app.get("/users/{user_id}", response_model=schemas.UserResponse)
+# def get_user(user_id: int, db: Session = Depends(get_db)):
+#     user = db.query(models.User).filter(models.User.id == user_id).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return user
+
+# # ──────────────────────────────────────────
+# # DELETE a user
+# # ──────────────────────────────────────────
+# @app.delete("/users/{user_id}")
+# def delete_user(user_id: int, db: Session = Depends(get_db)):
+#     user = db.query(models.User).filter(models.User.id == user_id).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     db.delete(user)
+#     db.commit()
+#     return {"message": "User deleted successfully"}
