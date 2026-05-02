@@ -1,19 +1,15 @@
-from pydantic import BaseModel,ConfigDict,Field
+from pydantic import BaseModel
 
+# What user sends when creating
+class UserCreate(BaseModel):
+    name: str
+    email: str
 
-class PostBase(BaseModel):
-  title:str = Field(min_length=1,max_length=50)
-  content:str = Field(min_length=1)
-  author:str = Field(min_length=1,max_length=100)
-  
-class PostCreate(PostBase):
-  pass
+# What API sends back in response
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
 
-
-class PostResponse(PostBase):
-  model_config = ConfigDict(from_attributes=True)
-  
-  id:int
-  date_posted:str
-
-  
+    class Config:
+        from_attributes = True  # Converts SQLAlchemy object → JSON
