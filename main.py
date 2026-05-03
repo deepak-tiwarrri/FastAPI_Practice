@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 from src.utils.db import Base, engine
 from src.tasks.router import task_router
+from src.users.router import user_router
 
-
-app = FastAPI(title="My Task Management Application")
+app = FastAPI(title="My Task Management Application", debug=True)
 
 # Create all tables in the database
 Base.metadata.create_all(bind=engine)
 
 
 app.include_router(task_router)
-
+app.include_router(user_router)
 
 
 

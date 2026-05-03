@@ -13,12 +13,12 @@ def create_task(body,db:Session):
    db.commit()
    db.refresh(new_task)
 
-   return {"status":"Task created successfully","data":new_task}
+   return new_task
 
 
 def get_task(db:Session):
    tasks = db.query(TaskModel).all()
-   return {"status":"All Tasks","data":tasks}
+   return tasks
 
 def get_one_task(task_id:int,db:Session):
    single_task = db.query(TaskModel).get(task_id)

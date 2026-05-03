@@ -1,15 +1,20 @@
 from fastapi import APIRouter,Depends,status
 from sqlalchemy.orm import Session
-from src.users.dtos import UserSchema
+from src.users.dtos import UserSchema, UserResponseSchema, LoginSchema
 from src.utils.db import get_db
 from src.users import controllers
 
 user_router = APIRouter(prefix='/user')
 
 
-@user_router.post('/register',status_code= status.HTTP_200_OK)
+@user_router.post('/register', status_code=status.HTTP_201_OK, response_model=UserResponseSchema)
 def register(body:UserSchema,db:Session=Depends(get_db)):
    return  controllers.register_user(body,db)
+
+
+@user_router.post('/login', status_code=status.HTTP_200_OK)
+def login(body: LoginSchema, db: Session = Depends(get_db)):
+   return controllers.login_user(body, db)
 
 
 

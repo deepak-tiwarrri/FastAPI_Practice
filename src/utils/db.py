@@ -3,9 +3,7 @@ from sqlalchemy.orm import declarative_base,sessionmaker,declarative_base
 from src.utils.settings import settings
 
 
-
-
-engine = create_engine(settings.db_connection)
+engine = create_engine(settings.DB_CONNECTION)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # create a base class for models

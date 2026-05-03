@@ -7,7 +7,7 @@ class TaskSchema(BaseModel):
 
 
 class TaskResponseSchema(BaseModel):
-   id:str
+   id:int
    title:str
    description:str
    is_completed:bool

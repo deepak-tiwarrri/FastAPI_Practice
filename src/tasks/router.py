@@ -20,14 +20,16 @@ def create_task_endpoint(body:TaskSchema,db:Session=Depends(get_db)):
 def get_all_task_endpoint(db:Session=Depends(get_db)):
    return controllers.get_task(db)
 
-# get one task - use 200 OK and return in format of list
-@task_router.get('/get_task/{task_id}',status_code=status.HTTP_200_OK,response_model=List[TaskResponseSchema])
+# get one task - use 200 OK and return single task
+
+
+@task_router.get('/get_task/{task_id}', status_code=status.HTTP_200_OK)
 def get_one_task_endpoint(task_id:int,db:Session=Depends(get_db)):
    return controllers.get_one_task(task_id,db)
 
 
-# update the task - use 201 OK and return in format of list
-@task_router.put('/update_task/{task_id}',status_code=status.HTTP_201_CREATED,response_model=List[TaskResponseSchema])
+# update the task - use 200 OK and return single task
+@task_router.put('/update_task/{task_id}', status_code=status.HTTP_200_OK)
 def update_one_task_endpoint(body:TaskSchema,task_id:int,db:Session=Depends(get_db)):
    return controllers.update_task(body,task_id,db)
 
