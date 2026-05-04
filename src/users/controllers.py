@@ -1,12 +1,12 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status,Request
 from src.users.dtos import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from src.users.models import UserModel
-from src.utils.settings import Settings
 from datetime import datetime, timedelta
+from src.utils.settings import settings
 password_helper = PasswordHash.recommended()
 
 
@@ -60,18 +60,38 @@ def login_user(body: LoginSchema, db: Session):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong Password")
 
-    finish_time = datetime.now() + timedelta(Settings.EXP)
+    finish_time = datetime.now() + timedelta(minutes=settings.EXP)
     print(finish_time)
 
     payload = {
         "_id": existing_user.id,
         "exp": finish_time
     }
-    token = jwt.encode(payload, Settings.SECRET_KEY,
-                       algorithm=Settings.ALGORITHM)
+    token = jwt.encode(payload, settings.SECRET_KEY,
+                       algorithm=settings.ALGORITHM)
     print(token)
     return {"user": existing_user, "token": token}
 
+def is_authenticated(request:Request,db:Session):
+
+   credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Could not validate credentials",   headers={"WWW-Authenticate": "Bearer"})
 
 
+   token = request.headers.get('Authorization')
+   print("token: ",token)
+   
+   if not token:
+       raise credentials_exception
+   
+   try:
+      actual_token = token.split(" ")[-1]
 
+      payload = jwt.decode(actual_token,settings.SECRET_KEY,settings.ALGORITHM)
+      user_id = payload.get('id')
+
+      
+
+   except InvalidTokenError:
+
+   return None
+    

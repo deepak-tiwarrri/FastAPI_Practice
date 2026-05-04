@@ -8,9 +8,10 @@ class Settings(BaseSettings):
         extra='ignore'
     )
     DB_CONNECTION: str
-    SECRET_KEY: str
-    ALGORITHM: str
-    EXP: int
+    SECRET_KEY: str = "default_secret_key"
+    ALGORITHM: str = "HS256"
+    EXP: int = 30
 
 
 settings = Settings()  # type: ignore
+print("Settings loaded:", settings.model_dump())

@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,status
+from fastapi import APIRouter,Depends,status,Request
 from sqlalchemy.orm import Session
 from src.users.dtos import UserSchema, UserResponseSchema, LoginSchema
 from src.utils.db import get_db
@@ -7,7 +7,7 @@ from src.users import controllers
 user_router = APIRouter(prefix='/user')
 
 
-@user_router.post('/register', status_code=status.HTTP_201_OK, response_model=UserResponseSchema)
+@user_router.post('/register', status_code=status.HTTP_201_CREATED, response_model=UserResponseSchema)
 def register(body:UserSchema,db:Session=Depends(get_db)):
    return  controllers.register_user(body,db)
 
@@ -16,6 +16,9 @@ def register(body:UserSchema,db:Session=Depends(get_db)):
 def login(body: LoginSchema, db: Session = Depends(get_db)):
    return controllers.login_user(body, db)
 
+@user_router.get('/is_auth',status_code=status.HTTP_202_ACCEPTED)
+def is_auth_endpoint(request:Request,db:Session=Depends(get_db)):
+   return controllers.is_authenticated(request,db)
 
 
 
