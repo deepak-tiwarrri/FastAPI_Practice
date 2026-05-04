@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status,Request
+from fastapi import HTTPException, status, Request
 from src.users.dtos import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 import jwt
@@ -19,43 +19,46 @@ def verify_hash_password(plain_password, hash_password):
 
 
 def register_user(body: UserSchema, db: Session):
-   existing_user = db.query(UserModel).filter(
-       UserModel.username == body.username).first()
-   if existing_user:
-       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                           detail="User is already registered")
+    existing_user = db.query(UserModel).filter(
+        UserModel.username == body.username).first()
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="User is already registered")
 
-   existing_email = db.query(UserModel).filter(
-       UserModel.email == body.email).first()
-   if existing_email:
-       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                           detail="Email is already registered")
+    existing_email = db.query(UserModel).filter(
+        UserModel.email == body.email).first()
+    if existing_email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Email is already registered")
 
-   hashed_password = get_hash_password(body.password)
+    hashed_password = get_hash_password(body.password)
 
 #    try:
-   new_user = UserModel(
-       name=body.name,
-       username=body.username,
-       password=hashed_password,
-       email=body.email
-   )
+    new_user = UserModel(
+        name=body.name,
+        username=body.username,
+        password=hashed_password,
+        email=body.email
+    )
 
-   db.add(new_user)
-   db.commit()
-   db.refresh(new_user)
-   return new_user
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 #    except Exception as e:
 #        db.rollback()
 #        print(e)
 
 
-def login_user(body: LoginSchema, db: Session):
+def login_user(body: LoginSchema, db):
     existing_user = db.query(UserModel).filter(
         UserModel.username == body.username).first()
     if not existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="User is not registered")
+    if existing_user.password is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Password not set for this user")
     if not verify_hash_password(body.password, existing_user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Wrong Password")
@@ -64,34 +67,40 @@ def login_user(body: LoginSchema, db: Session):
     print(finish_time)
 
     payload = {
-        "_id": existing_user.id,
-        "exp": finish_time
+        "id": existing_user.id,
+        "username": existing_user.username
     }
     token = jwt.encode(payload, settings.SECRET_KEY,
                        algorithm=settings.ALGORITHM)
     print(token)
     return {"user": existing_user, "token": token}
 
-def is_authenticated(request:Request,db:Session):
 
-   credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Could not validate credentials",   headers={"WWW-Authenticate": "Bearer"})
+def is_authenticated(request: Request, db: Session):
 
+    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                          detail="Could not validate credentials")
 
-   token = request.headers.get('Authorization')
-   print("token: ",token)
-   
-   if not token:
-       raise credentials_exception
-   
-   try:
-      actual_token = token.split(" ")[-1]
+    token = request.headers.get('Authorization')
+    print("token: ", token)
 
-      payload = jwt.decode(actual_token,settings.SECRET_KEY,settings.ALGORITHM)
-      user_id = payload.get('id')
+    if not token:
+        raise credentials_exception
 
-      
+    try:
+        actual_token = token.strip().split(" ")[-1].strip()
+        print("actual token:", actual_token)
+        payload = jwt.decode(
+            actual_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
-   except InvalidTokenError:
+        print("payload: ", payload)
+        print("getting the user id: ", payload.get('id'))
+        user_id = payload.get('id')
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        print("user:", user)
+        if not user:
+            raise credentials_exception
 
-   return None
-    
+    except InvalidTokenError:
+        raise credentials_exception
+    return {"user": user, "message": "Authenticated Successfully"}

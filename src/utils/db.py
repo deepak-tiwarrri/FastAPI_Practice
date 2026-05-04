@@ -2,7 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base,sessionmaker,declarative_base
 from src.utils.settings import settings
 
-
 engine = create_engine(settings.DB_CONNECTION)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
