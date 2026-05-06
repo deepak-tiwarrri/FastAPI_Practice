@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from src.users.dtos import UserResponseSchema
 
 class TaskSchema(BaseModel):
    title:str
@@ -11,6 +12,11 @@ class TaskResponseSchema(BaseModel):
    title:str
    description:str
    is_completed:bool
+
+
+class TaskCreateResponseSchema(BaseModel):
+   task: TaskResponseSchema
+   user: UserResponseSchema
 
 
 

@@ -76,31 +76,3 @@ def login_user(body: LoginSchema, db):
     return {"user": existing_user, "token": token}
 
 
-def is_authenticated(request: Request, db: Session):
-
-    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                          detail="Could not validate credentials")
-
-    token = request.headers.get('Authorization')
-    print("token: ", token)
-
-    if not token:
-        raise credentials_exception
-
-    try:
-        actual_token = token.strip().split(" ")[-1].strip()
-        print("actual token:", actual_token)
-        payload = jwt.decode(
-            actual_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-
-        print("payload: ", payload)
-        print("getting the user id: ", payload.get('id'))
-        user_id = payload.get('id')
-        user = db.query(UserModel).filter(UserModel.id == user_id).first()
-        print("user:", user)
-        if not user:
-            raise credentials_exception
-
-    except InvalidTokenError:
-        raise credentials_exception
-    return {"user": user, "message": "Authenticated Successfully"}

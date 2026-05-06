@@ -1,8 +1,9 @@
 from fastapi import HTTPException
 from src.tasks.models import TaskModel
 from sqlalchemy.orm import Session 
+from src.users.models import UserModel
 
-def create_task(body,db:Session):
+def create_task(body,db:Session,current_user:UserModel):
    data = body.model_dump()
    new_task = TaskModel(
       title=data['title'],
@@ -13,7 +14,7 @@ def create_task(body,db:Session):
    db.commit()
    db.refresh(new_task)
 
-   return new_task
+   return {"task":new_task,"user":current_user}
 
 
 def get_task(db:Session):
