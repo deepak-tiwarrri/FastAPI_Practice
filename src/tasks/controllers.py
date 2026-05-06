@@ -8,7 +8,8 @@ def create_task(body,db:Session,current_user:UserModel):
    new_task = TaskModel(
       title=data['title'],
       description=data['description'],
-      is_completed = data['is_completed']
+      is_completed=data['is_completed'],
+      user_id=current_user.id
    )
    db.add(new_task)
    db.commit()
