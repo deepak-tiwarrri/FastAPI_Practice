@@ -2,10 +2,10 @@ from fastapi import HTTPException, status, Request
 from src.users.dtos import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 import jwt
-from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from src.users.models import UserModel
 from datetime import datetime, timedelta
+
 from src.utils.settings import settings
 password_helper = PasswordHash.recommended()
 
@@ -75,4 +75,9 @@ def login_user(body: LoginSchema, db):
     print(token)
     return {"user": existing_user, "token": token}
 
+
+def get_all_users(db:Session):
+    users = db.query(UserModel).all();
+    print(users)
+    return users;
 

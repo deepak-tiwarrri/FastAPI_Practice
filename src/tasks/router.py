@@ -18,26 +18,26 @@ def create_task_endpoint(body:TaskSchema,db:Session=Depends(get_db),current_user
    return controllers.create_task(body,db,current_user)
 
 # get all - use 200 OK and return a list
-@task_router.get("/get_tasks",status_code=status.HTTP_200_OK,response_model=List[TaskResponseSchema])
-def get_all_task_endpoint(db:Session=Depends(get_db)):
-   return controllers.get_task(db)
+@task_router.get("/get_all_tasks",status_code=status.HTTP_200_OK,response_model=List[TaskResponseSchema])
+def get_all_task_endpoint(db:Session=Depends(get_db),user:UserModel=Depends(is_authenticated)):
+   return controllers.get_task(db,user)
 
 # get one task - use 200 OK and return single task
 
 
 @task_router.get('/get_task/{task_id}', status_code=status.HTTP_200_OK)
-def get_one_task_endpoint(task_id:int,db:Session=Depends(get_db)):
-   return controllers.get_one_task(task_id,db)
+def get_one_task_endpoint(task_id:int,db:Session=Depends(get_db),user:UserModel=Depends(is_authenticated)):
+   return controllers.get_one_task(task_id,db,user)
 
 
 # update the task - use 200 OK and return single task
 @task_router.put('/update_task/{task_id}', status_code=status.HTTP_200_OK)
-def update_one_task_endpoint(body:TaskSchema,task_id:int,db:Session=Depends(get_db)):
-   return controllers.update_task(body,task_id,db)
+def update_one_task_endpoint(body:TaskSchema,task_id:int,db:Session=Depends(get_db),user:UserModel=Depends(is_authenticated)):
+   return controllers.update_task(body,task_id,db,user)
 
 
 # delete the task - use 204 No Content
 @task_router.delete('/delete_task/{task_id}',status_code=status.HTTP_204_NO_CONTENT)
-def delete_one_task_endpoint(task_id:int,db:Session=Depends(get_db)):
+def delete_one_task_endpoint(task_id:int,db:Session=Depends(get_db),user:UserModel=Depends(is_authenticated)):
    return controllers.delete_task(task_id,db)
 

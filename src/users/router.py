@@ -20,6 +20,10 @@ def login(body: LoginSchema, db: Session = Depends(get_db)):
 def is_auth_endpoint(request:Request,db:Session=Depends(get_db)):
    return controllers.is_authenticated(request,db)
 
+@user_router.get("/get_all_users",status_code=status.HTTP_200_OK)
+def get_all_users_endpoint(db:Session=Depends(get_db)):
+   return controllers.get_all_users(db)
+
 
 
 

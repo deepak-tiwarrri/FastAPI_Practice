@@ -33,4 +33,4 @@ def is_authenticated(request: Request, db: Session=Depends(get_db)):
         return user
 
     except InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Bad token!!")
+        raise credentials_exception
